@@ -11,19 +11,24 @@ import UIKit
 class ViewController: UIViewController {
 
     @IBOutlet weak var display: UILabel!
+    @IBOutlet weak var history: UILabel!
     
     var userIsInTheMiddleOfTypingNumber = false
     
     @IBAction func appendDigit(sender: UIButton) {
         let digit = sender.currentTitle!
         if  userIsInTheMiddleOfTypingNumber {
-            display.text = display.text! + digit
+            if display.text!.rangeOfString(".")  == nil || digit  != "." {
+                display.text = display.text! + digit
+            }
         } else {
-            display.text = digit
-            userIsInTheMiddleOfTypingNumber = true
+            if digit != "." {
+                display.text = digit
+                userIsInTheMiddleOfTypingNumber = true
+            }
         }
     }
-    
+
     @IBAction func operate(sender: UIButton) {
         let operation = sender.currentTitle!
         if userIsInTheMiddleOfTypingNumber {
@@ -35,8 +40,24 @@ class ViewController: UIViewController {
             case "+": performOperation {$0 + $1}
             case "−": performOperation {$1 - $0}
             case "√": performOperation { sqrt($0) }
+            case "sin": performOperation { sin($0) }
+            case "cos": performOperation { cos($0) }
+            case "∏": performOperation { M_PI }
             default: break
         }
+    }
+    
+
+    @IBAction func historyAction(sender: UIButton) {
+        history.text = history.text! + sender.currentTitle!
+    }
+    
+    
+    @IBAction func clear(sender: UIButton) {
+        history.text = " "
+        display.text = "0"
+        operandStack = []
+        userIsInTheMiddleOfTypingNumber = false
     }
     
     func performOperation(operation: (Double, Double) -> Double){
@@ -52,13 +73,20 @@ class ViewController: UIViewController {
             enter()
         }
     }
+
+    private func performOperation(operation: () -> Double){
+        if operandStack.count >= 2{
+            displayValue = operation()
+            enter()
+        }
+    }
     
     var operandStack = Array<Double>()
     
     @IBAction func enter() {
         userIsInTheMiddleOfTypingNumber = false
         operandStack.append(displayValue)
-        println("operantStack = \(operandStack)")
+        //print("operantStack = \(operandStack)")
     }
     
     var displayValue: Double {
